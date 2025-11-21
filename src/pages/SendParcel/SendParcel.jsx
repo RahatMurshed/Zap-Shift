@@ -51,6 +51,7 @@ export default function SendParcelPage() {
     }
 
     console.log('cost', cost)
+    data.price = cost;
     Swal.fire({
       title: "Agree with the Cost?",
       text: `You will be charged ${cost} taka` ,
@@ -70,11 +71,11 @@ export default function SendParcelPage() {
 
 
         
-        // Swal.fire({
-        //   title: "Order Placed",
-        //   text: "Your file has been deleted.",
-        //   icon: "success"
-        // });
+        Swal.fire({
+          title: "Order Placed",
+          text: "Your file has been deleted.",
+          icon: "success"
+        });
       }
     });
 
