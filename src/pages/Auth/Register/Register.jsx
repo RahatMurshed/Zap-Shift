@@ -3,65 +3,89 @@ import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router';
 import useAuth from '../../../Hooks/useAuth';
 import axios from 'axios';
+import useAxiosSecure from '../../../Hooks/useAxiosSecure';
 
 const Register = () => {
 
+    
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const { createUser, setUser, googleLogin, updateUserProfile } = useAuth();
+    const { createUser, setUser,  googleLogin, updateUserProfile } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const axiosSecure = useAxiosSecure();
 
 
 
     const handleRegistration = (data) => {
-        console.log(data.photo[0].name)
+        // console.log(data)
         const profileImg = data.photo[0];
 
 
-        console.log('after register ', data)
+        
         createUser(data.email, data.pass)
             .then(res => {
-                console.log(res.user);
+                
                 // Store the image and get the image url
                 const fromData = new FormData();
                 fromData.append('image', profileImg);
 
                 axios.post(`https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_host_key}`, fromData)
-                .then(data=>{
-                    console.log('after post',data.data.data.url);
+                    .then(res => {
+                        const photoURL = res.data.data.url;
+                        
 
-                      // update user profile
-                    const userProfile = {
-                        displayName:data.name,
-                        photoURL: data.data.data.url,
-                    
-                    };
+                        // Create User in db
+                        const userInfo = {
+                            email: data.email,
+                            displayName: data.name,
+                            photoURL: photoURL,
 
 
-                    updateUserProfile(userProfile)
-                    .then(()=>{
-                        console.log('updatedProfile')
+                        }
+
+                        axiosSecure.post('/users', userInfo)
+                        .then(res=>{
+                            if(res.data.insertedId){
+                                console.log('User Created in the db')
+                            }
+                        })
+
+
+                        // update user profile
+                        const userProfile = {
+                            displayName: data.name,
+                            photoURL: photoURL,
+
+                        };
+
+
+                        updateUserProfile(userProfile)
+                            .then(() => {
+                                console.log('updatedProfile')
+                            })
+                            .catch(err => {
+                                console.log(err.message)
+                            })
+
+
+
                     })
-                    .catch(err=>{
-                        console.log(err.message)
-                    })
 
 
 
-                })
-
-              
-                
 
 
 
 
                 setUser(res.user);
+               
                 navigate(location?.state || '/');
             })
             .catch(err => {
                 console.log(err.message);
             })
+
+             
 
     };
 
@@ -71,7 +95,24 @@ const Register = () => {
             .then(res => {
                 console.log(res.user);
                 setUser(res.user);
-                navigate(location?.state || '/');
+
+                const userInfo = {
+                            email: res.user.email,
+                            displayName: res.user.displayName,
+                            photoURL:res.user.photoURL,
+                        }
+
+                        axiosSecure.post('/users', userInfo)
+                        .then((res)=>{
+                            if(res.data.insertedId){
+                                 console.log('User has been saved to db');
+
+                                
+                            }
+                             navigate(location?.state || '/');
+                           
+                        })
+
             })
             .catch(err => {
                 console.log(err.message)
@@ -93,10 +134,10 @@ const Register = () => {
                         {/* Photo */}
                         <div>
                             <label className="block text-sm font-medium mb-1">Profile Image</label>
-                            
+
                             <input
                                 type="file"
-                                
+
                                 placeholder="Name"
                                 {...register('photo', { required: true })}
                                 className=" input-bordered w-full file-input"
@@ -106,7 +147,7 @@ const Register = () => {
                         {/* Name */}
                         <div>
                             <label className="block text-sm font-medium mb-1">Name</label>
-                            
+
                             <input
                                 type="text"
                                 name='name'

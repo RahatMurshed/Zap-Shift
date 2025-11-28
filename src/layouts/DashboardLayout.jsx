@@ -1,6 +1,10 @@
 import React from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
 import { CiDeliveryTruck } from "react-icons/ci";
+import { BsCreditCard2Back } from "react-icons/bs";
+import { RiMotorbikeLine } from "react-icons/ri";
+import { FaUser } from 'react-icons/fa6';
+
 
 
 const DashboardLayout = () => {
@@ -37,6 +41,15 @@ const DashboardLayout = () => {
 
                         {/* our dashboards links */}
                         <li><NavLink to='/dashboard/my-parcels' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Parcels"><CiDeliveryTruck className=' text-lg' /> <span className="is-drawer-close:hidden flex items-center  "> My Parcels</span></NavLink></li>
+
+
+                        <li><NavLink to='/dashboard/payment-history' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Payment History"><BsCreditCard2Back /> <span className="is-drawer-close:hidden flex items-center  "> Payment History</span></NavLink></li>
+
+
+                        <li><NavLink to='/dashboard/approve-riders' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Approve Riders"><RiMotorbikeLine /> <span className="is-drawer-close:hidden flex items-center  "> Approve Riders</span></NavLink></li>
+
+
+                        <li><NavLink to='/dashboard/users-management' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Users Management"><FaUser /> <span className="is-drawer-close:hidden flex items-center  ">Users Management</span></NavLink></li>
 
 
 

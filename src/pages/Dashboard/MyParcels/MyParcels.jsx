@@ -7,6 +7,7 @@ import { FaTrashCan } from "react-icons/fa6";
 
 import { FaEye } from "react-icons/fa";
 import Swal from 'sweetalert2';
+import { Link } from 'react-router';
 
 
 
@@ -38,25 +39,42 @@ const MyParcels = () => {
             if (result.isConfirmed) {
 
                 axiosSecure.delete(`/parcels/${id}`)
-                .then(res =>{
-                    console.log(res.data);
+                    .then(res => {
+                        console.log(res.data);
 
-                    if(res.data.deletedCount){
-                        refetch();
-                         Swal.fire({
-                    title: "Deleted!",
-                    text: "Your parcel request has been deleted.",
-                    icon: "success"
-                });
+                        if (res.data.deletedCount) {
+                            refetch();
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: "Your parcel request has been deleted.",
+                                icon: "success"
+                            });
 
-                    }
-                })
+                        }
+                    })
 
 
 
-               
+
             }
         });
+    }
+
+    const handlePayment = async (parcel)=>{
+        const paymentInfo = {
+
+            price:parcel.price,
+            id: parcel._id,
+            senderEmail: parcel.senderEmail,
+            parcelName: parcel.parcelName,
+
+        }
+
+        const res = await axiosSecure.post('/checkout', paymentInfo);
+        console.log(res.data.url);
+        window.location.assign(res.data.url);
+
+
     }
 
 
@@ -72,7 +90,8 @@ const MyParcels = () => {
                             <th></th>
                             <th>Name</th>
                             <th>Price</th>
-                            <th>Payment Status</th>
+                            <th>Payment </th>
+                            <th>Delivery Status </th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -82,7 +101,20 @@ const MyParcels = () => {
                                 <th>{index + 1}</th>
                                 <td>{parcel.parcelName}</td>
                                 <td>{parcel.price}</td>
-                                <td>Blue</td>
+                 <td>
+                     {
+                        parcel.paymentStatus === 'paid'?
+                        <span className=' text-green-500'>Paid</span>  :    
+                           
+                            <button 
+                            onClick={()=>{handlePayment(parcel)}}
+                            className="btn btn-sm btn-primary text-black">
+                                Pay
+                            </button>
+                               
+                    }
+                 </td>
+                                <td>{parcel.deliveryStatus}</td>
                                 <td>
                                     <div className="space-x-3">
                                         <button className='btn btn-square hover:bg-primary'><FaEye />

@@ -1,16 +1,17 @@
 import { useForm, useWatch } from "react-hook-form";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useAuth from "../../Hooks/useAuth";
 
 export default function SendParcelPage() {
   const { register, handleSubmit, control } = useForm();
-  const {user} = useAuth();
+  const { user } = useAuth();
 
   const axiosSecure = useAxiosSecure();
 
   const warehouseData = useLoaderData();
+  const navigate = useNavigate();
 
   const regionsDuplicate = warehouseData.map(warehouse => warehouse.region);
   const regions = [...new Set(regionsDuplicate)];
@@ -54,28 +55,35 @@ export default function SendParcelPage() {
     data.price = cost;
     Swal.fire({
       title: "Agree with the Cost?",
-      text: `You will be charged ${cost} taka` ,
+      text: `You will be charged ${cost} taka`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "I Agree!"
+      confirmButtonText: "Confirm and continue payment!"
     }).then((result) => {
       if (result.isConfirmed) {
 
 
         axiosSecure.post('/parcels', data)
-        .then(res =>{
-          console.log('after saving to db',res.data);
-        })
+          .then(res => {
+            console.log('after saving to db', res.data);
+
+            if (res.data.insertedId) {
+              navigate('/dashboard/my-parcels')
+              Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "Parcel has created. please pay!",
+                showConfirmButton: false,
+                timer: 2500
+              });
+            }
+          })
 
 
-        
-        Swal.fire({
-          title: "Order Placed",
-          text: "Your file has been deleted.",
-          icon: "success"
-        });
+
+
       }
     });
 
